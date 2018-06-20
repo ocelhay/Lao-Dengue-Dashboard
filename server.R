@@ -1,6 +1,11 @@
 shinyServer(
   function(input, output, session) {
-    
+    # PLH1
+    # Information on the status of data: is the data loaded, and when the data was generated.
+    output$data_status <- renderText({
+      paste0(icon("info-circle", "fa-2x"), " ", "The dengue data was generated on the ", dengue_data$date, ".", br(),
+             "The whole dataset contains ", nrow(dengue_data$dengue), " elements.")
+    })
     
     # Render Text on number of specimens
     output$filter_specimens <- renderText({

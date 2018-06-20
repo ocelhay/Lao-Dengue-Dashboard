@@ -1,34 +1,29 @@
 library(DT)
 
 fluidPage(
-  includeCSS("./www/styles.css"),
+  includeCSS("./www/CSS/styles2.css"),
+  
   theme = shinytheme("readable"),
   
-  sidebarPanel(width = 3,
-               h2("LOMWRU Dengue Dashboard"),
-               a(href = "http://www.tropmedres.ac/lomwru-laos", "Learn more about LOMWRU")
-  ),
-  
-  
-  mainPanel(width = 9,
+  mainPanel(width = 12,
             navbarPage(NULL, position = "static-top", id = "tabs", collapsible = TRUE,  windowTitle = "LOMWRU Dengue Dashboard",
                        tabPanel("Dashboard", value = "dashboard",
-                                
                                 fluidRow(
                                   column(width = 7,
                                          includeMarkdown("./www/disclaimer.md")
                                   ),
                                   column(width = 1, br()),
                                   column(width = 4,
-                                         h2(icon("upload", "fa-1x"), "Upload data"),
-                                         p("Provide the data to be displayed in this dashboard, for more info, contact", 
-                                           tags$a(href = "mailto:olivier.celhay@gmail.com", "Olivier Celhay.")),
+                                         h2("Upload Data"),
+                                         p("Provide the data to be displayed in this dashboard, for more info, ", 
+                                           tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us.")),
                                          fileInput("file_RData", label = NULL, accept = ".RData", buttonLabel = "Browse..."),
-                                         p("placeholder—status of data"),
-                                         p("placeholder—dimensions of data")
+                                         # PLH1
+                                         div(class = "info-box", 
+                                             htmlOutput("data_status"))
                                   )
                                 ),
-                                h2("About Dengue"),
+                                h2("What is Dengue?"),
                                 div(class = "img_text",
                                     img(src = "aedes_aegypti.jpg", alt = "Aedes Aegypti")
                                 ),
@@ -75,7 +70,13 @@ fluidPage(
                                   )
                                 )
                        ),
-                       tabPanel("About", value = "about", includeMarkdown("./www/about_app.md")
+                       tabPanel("About", value = "about", icon = icon("info-circle", "fa-1x"),
+                                fluidRow(
+                                  div(class = "img_text",
+                                      a(href = "http://www.tropmedres.ac/lomwru-laos", img(src = "moru-logo.png", alt = "MORU"))
+                                  )
+                                ),
+                                includeMarkdown("./www/about_app.md")
                        )
             )
   )

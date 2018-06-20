@@ -10,9 +10,11 @@ library(tidyverse)
 # Load data -- TODO: remove in production
 load("./www/Dengue_Data_Latest.RData")
 
-dengue <- dengue_data$dengue
 
-d <- dengue %>%
+d <- dengue_data$dengue %>%
+  mutate(month = month(collection_date, label = TRUE)) %>%
   filter(dengue_virus %in% c("Presumptive", "Confirmed"))
 
-d2 <- d %>% mutate(month = month(collection_date, label = TRUE)) %>% group_by(collection_year, month) %>% summarise(total = n())
+d2 <- d  %>% 
+  group_by(collection_year, month) %>% 
+  summarise(total = n())
