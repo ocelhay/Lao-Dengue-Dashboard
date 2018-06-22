@@ -1,28 +1,53 @@
 library(DT)
 
 fluidPage(
-  includeCSS("./www/CSS/styles2.css"),
+  includeCSS("./www/CSS/styles5.css"),
   
   theme = shinytheme("readable"),
   
-  mainPanel(width = 12,
+  sidebarPanel(width = 3,
+               fluidRow(
+                 conditionalPanel(condition = "input.tabs == 'dashboard'",
+                                  br(), br(), br(), br(),
+                                  h4("Upload Data"),
+                                  p("Provide the data to be displayed in this dashboard, for more info, ", 
+                                    tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us.")),
+                                  fileInput("file_RData", label = NULL, accept = ".RData", buttonLabel = "Browse..."),
+                                  
+                                  # PLH1
+                                  div(class = "info-box", 
+                                      htmlOutput("data_status")),
+                                  hr()
+                 ),
+               conditionalPanel(condition = "input.tabs == 'dengue_trends' | input.tabs == 'dengue_patients'",
+                                br(), br(), br(), 
+                                hr(),
+                                h2("Filter Data"),
+                                dateRangeInput("filter_date", "Filter by collection date", start = min_collection_date, end = max_collection_date),
+                                hr()
+                                )
+               )
+  ),
+               
+  mainPanel(width = 9,
             navbarPage(NULL, position = "static-top", id = "tabs", collapsible = TRUE,  windowTitle = "LOMWRU Dengue Dashboard",
                        tabPanel("Dashboard", value = "dashboard",
-                                fluidRow(
-                                  column(width = 7,
-                                         includeMarkdown("./www/disclaimer.md")
-                                  ),
-                                  column(width = 1, br()),
-                                  column(width = 4,
-                                         h2("Upload Data"),
-                                         p("Provide the data to be displayed in this dashboard, for more info, ", 
-                                           tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us.")),
-                                         fileInput("file_RData", label = NULL, accept = ".RData", buttonLabel = "Browse..."),
-                                         # PLH1
-                                         div(class = "info-box", 
-                                             htmlOutput("data_status"))
-                                  )
-                                ),
+                                includeMarkdown("./www/disclaimer.md"),
+                                # fluidRow(
+                                  # column(width = 7,
+                                  #        includeMarkdown("./www/disclaimer.md")
+                                  # ),
+                                  # column(width = 1, br()),
+                                  # column(width = 4,
+                                  #        h2("Upload Data"),
+                                  #        p("Provide the data to be displayed in this dashboard, for more info, ", 
+                                  #          tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us.")),
+                                  #        fileInput("file_RData", label = NULL, accept = ".RData", buttonLabel = "Browse..."),
+                                  #        # PLH1
+                                  #        div(class = "info-box", 
+                                  #            htmlOutput("data_status"))
+                                  # )
+                                # ),
                                 h2("What is Dengue?"),
                                 div(class = "img_text",
                                     img(src = "aedes_aegypti.jpg", alt = "Aedes Aegypti")

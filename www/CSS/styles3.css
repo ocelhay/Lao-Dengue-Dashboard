@@ -16,8 +16,15 @@
   margin-bottom: 15px;
 }
 
-
 .well {
-            background-color: #fff;
-        }
+  background-color: #fff;
+  border-style: none;
+}
+
+.alert {
+    padding: 20px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-bottom: 15px;
+}
 
