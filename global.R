@@ -20,8 +20,4 @@ library(tidyverse)
 #   group_by(collection_year, collection_month) %>% 
 #   summarise(total = n())
 
-# min_collection_date <- min(d$collection_date)
-# max_collection_date <- max(d$collection_date)
-# 
-# min_collection_date <- min(d$collection_date)
-# max_collection_date <- max(d$collection_date)
+

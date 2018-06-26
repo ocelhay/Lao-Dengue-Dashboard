@@ -1,4 +1,3 @@
-Credit: Audrey Dubot-Pérès, Onanong Sengvilaipaseuth, Olivier Celhay.
 
 LOMWRU, grants, etc.
 
