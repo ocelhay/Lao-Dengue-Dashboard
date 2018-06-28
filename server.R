@@ -7,6 +7,12 @@ shinyServer(
     source_data <- reactiveVal(NULL)
     date_generation <- reactiveVal(NULL)
     
+    # Hide several tabs at the launch of the app
+    observeEvent(NULL, {
+      hideTab(inputId = "tabs", target = "dengue_trends")
+      hideTab(inputId = "tabs", target = "dengue_patients")
+      hideTab(inputId = "tabs", target = "dengue_virus")
+      }, ignoreNULL = FALSE)
     
     # Load .Rdata from input and update reactive values.
     observeEvent(input$file_RData,{
@@ -22,6 +28,11 @@ shinyServer(
       dengue_data_dl(dengue_data$dengue)
       source_data(dengue_data$source)
       date_generation(dengue_data$date_generation)
+      
+      # Show Tabs
+      showTab(inputId = "tabs", target = "dengue_trends")
+      showTab(inputId = "tabs", target = "dengue_patients")
+      showTab(inputId = "tabs", target = "dengue_virus")
       
       # Update elements of the UI
       min_collection_date <- min(dengue_data_dl()$collection_date)

@@ -1,7 +1,7 @@
 library(DT)
 
 fluidPage(
-  includeCSS("./www/CSS/styles5.css"),
+  includeCSS("./www/styles.css"),
   
   theme = shinytheme("readable"),
   
