@@ -47,7 +47,8 @@ fluidPage(
                        tabPanel("Epidemic Trends", value = "dengue_trends",
                                 tabsetPanel(
                                   tabPanel("Focus per week",
-                                           plotOutput("plot_dengue_week"), # PLH2
+                                           # plotOutput("plot_dengue_week"), # PLH2
+                                           highchartOutput("plot_dengue_week"), # PLH2
                                            dataTableOutput("table_dengue_week") # PLH3
                                   ),
                                   tabPanel("Focus per day",

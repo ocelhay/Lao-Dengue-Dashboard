@@ -73,18 +73,36 @@ shinyServer(
     
     
     # PLH2: plot dengue cases per week
-    output$plot_dengue_week <- renderPlot({
+    output$plot_dengue_week <- renderHighchart({
       req(data_available())
       
-      ggplot(data = dengue_data_filt(), aes(x = collection_week, fill = dengue_virus)) +
-        geom_bar(stat = "count", width = 0.5) +
-        labs(x = "Week number", y = "Cases", title = "Dengue Tests Results", subtitle = " per week") +
-        facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 16) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1)
-        )
+      # data <- dengue_data$dengue %>% 
+      data <- dengue_data_filt() %>%
+        group_by(collection_week, dengue_virus) %>% 
+        count() %>%
+        ungroup()
+      
+      hchart(data, "column", hcaes(x = collection_week, y = n, group = dengue_virus)) %>%
+        hc_plotOptions(column = list(stacking = "normal", dataLabels = list())) %>% 
+        hc_add_theme(hc_theme_538()) %>%
+        hc_title(text = "Patients per week") %>%
+        hc_xAxis(title = list(text = "Week of collection")) %>%
+        hc_yAxis(title = list(text = "Number of Patients"))
     })
+    
+    
+    # output$plot_dengue_week <- renderPlot({
+    #   req(data_available())
+    #   
+    #   ggplot(data = dengue_data_filt(), aes(x = collection_week, fill = dengue_virus)) +
+    #     geom_bar(stat = "count", width = 0.5) +
+    #     labs(x = "Week number", y = "Cases", title = "Dengue Tests Results", subtitle = " per week") +
+    #     facet_wrap(~ collection_year, scales = "free_x") +
+    #     theme_minimal(base_size = 16) +
+    #     theme(legend.position = "bottom", legend.title = element_blank()) +
+    #     guides(fill = guide_legend(nrow = 1)
+    #     )
+    # })
     
     # PLH3: table of dengue cases per week
     output$table_dengue_week <- renderDT({
