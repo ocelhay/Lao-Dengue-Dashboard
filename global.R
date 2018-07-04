@@ -8,17 +8,4 @@ library(shinythemes)
 library(shinyWidgets)
 library(tidyverse)
 
-# Load data -- TODO: remove in production
-# load("./www/Dengue_Data_Latest.RData")
-# load("./App/www/Dengue_Data_Latest.RData")
-
-# data_available <- FALSE
-# 
-# d <- dengue_data$dengue %>%
-#   filter(dengue_virus %in% c("Presumptive", "Confirmed"))
-# 
-# d2 <- d  %>% 
-#   group_by(collection_year, collection_month) %>% 
-#   summarise(total = n())
-
 

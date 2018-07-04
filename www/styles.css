@@ -1,4 +1,16 @@
-.img_text {
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.imgsidebar {
+  width: 95%;
+  border:3px solid black;
+}
+
+
+.imgtext {
+  width: 35%;
   margin-left: 10px;
   margin-right: 10px;
   float: left;
