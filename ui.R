@@ -1,5 +1,3 @@
-library(DT)
-
 fluidPage(
   includeCSS("./www/styles.css"),
   
