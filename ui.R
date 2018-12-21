@@ -1,40 +1,32 @@
 fluidPage(
-  includeCSS("./www/styles.css"),
-  
   theme = shinytheme("spacelab"),
+  includeCSS("./www/styles.css"),
   
   sidebarPanel(width = 3,
                fluidRow(
-                 br(),
                  div(class = "imgsidebar",
                      img(src = 'aedes_aegypti.jpg')
                  )
                ),
-               
                fluidRow(
                  conditionalPanel(condition = "input.tabs == 'welcome'",
-                                  br(), br(), 
-                                  h2("Upload Data"),
+                                  h4(icon("upload"), "Upload Data"),
                                   p("Provide the data to be displayed in this dashboard, for more info, ", 
                                     tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us.")),
                                   fileInput("file_RData", label = NULL, accept = ".RData", buttonLabel = "Browse..."),
-                                  
-                                  # PLH1
-                                  div(class = "info-box", 
-                                      htmlOutput("data_status")),
-                                  hr()
+                                  htmlOutput("data_status")
                  ),
+                 
                  conditionalPanel(condition = "input.tabs == 'dengue_trends' | input.tabs == 'info_patients' | input.tabs == 'dengue_virus'",
-                                  br(), br(), 
-                                  h2("Filter Data"),
-                                  dateRangeInput("filter_date", "Filter by collection date"),
-                                  checkboxGroupInput("filter_age", "Filter by age categories", choices = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), 
-                                                     selected = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), inline = TRUE),
-                                  checkboxGroupInput("filter_status", "Filter by case status", choices = c("Presumptive", "Confirmed", "No evidence of dengue virus"), 
-                                                     selected = c("Presumptive", "Confirmed", "No evidence of dengue virus"), inline = TRUE),
-                                  # PLH1bis
-                                  htmlOutput("data_filter"),
-                                  hr()
+                                  div(class = "filterbox", 
+                                      h4(icon("filter"), "Filter Dataset"),
+                                      dateRangeInput("filter_date", "Filter by collection date"),
+                                      checkboxGroupInput("filter_age", "Filter by age categories", choices = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), 
+                                                         selected = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), inline = TRUE),
+                                      checkboxGroupInput("filter_status", "Filter by case status", choices = c("presumptive dengue infection", "confirmed dengue infection", "no evidence of dengue infection"), 
+                                                         selected = c("presumptive dengue infection", "confirmed dengue infection", "no evidence of dengue infection"), inline = TRUE)
+                                  ),
+                                  div(class = 'floatbottom', htmlOutput("data_filter"))
                  )
                )
   ),
@@ -141,7 +133,7 @@ fluidPage(
                                   )
                                 )
                        ),
-                       tabPanel("About", value = "about", icon = icon("info-circle", "fa-1x"),
+                       tabPanel("About", value = "about",
                                 fluidRow(
                                   p("Dashboard in development — for more info, ", 
                                     tags$a(href = "mailto:olivier.celhay@gmail.com", "contact us."))

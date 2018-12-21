@@ -5,7 +5,8 @@ img {
 
 .imgsidebar {
   width: 95%;
-  border:3px solid black;
+  border:1px solid black;
+  margin-bottom: 25px;
 }
 
 
@@ -16,34 +17,39 @@ img {
   float: left;
 }
 
-.info-box {
-  display: block;
-  min-height: 90px;
-  background: #fff;
-  color: red;
-  width: 100%;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
 
 /* Sidebar panel */
 .well {
   background-color: #fff;
   border-style: none;
+  color: black;
 }
 
 .alert {
-    padding: 20px;
-    background-color: #f44336; /* Red */
+    padding: 5px;
+    background-color: #BD3D3A;
     color: white;
     margin-bottom: 15px;
 }
 
-.info {
-      padding: 20px;
-    background-color: #0066ff; /* Blue */
-    color: white;
+.infobox {
+  padding: 5px;
+  background-color: #d9ecd0; 
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.filterbox {
+    padding: 5px;
+    background-color: #ecf0f1; 
     margin-bottom: 15px;
+    margin-top: 5px;
+}
+
+.floatbottom {
+  position:fixed;
+  width: 25%;
+	bottom: calc(2%);
+	left: calc(2%);
+	z-index: 9999;
 }

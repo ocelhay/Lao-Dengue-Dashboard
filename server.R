@@ -12,7 +12,7 @@ shinyServer(
       hideTab(inputId = "tabs", target = "dengue_trends")
       hideTab(inputId = "tabs", target = "info_patients")
       hideTab(inputId = "tabs", target = "dengue_virus")
-      }, ignoreNULL = FALSE)
+    }, ignoreNULL = FALSE)
     
     # Load .Rdata from input and update reactive values.
     observeEvent(input$file_RData,{
@@ -54,12 +54,17 @@ shinyServer(
     # PLH1: information on the status of data
     output$data_status <- renderText({
       ifelse(data_available(),
-             paste0(div(class = "info", icon("info-circle", "fa-2x"), strong("Data uploaded"), tags$ul( 
-               tags$li("source: ", source_data()),
-               tags$li("generated on the: ", date_generation()),
-               tags$li("number of elements: ", nrow(dengue_data_dl())))
-             )),
-             paste0(div(class = "alert", icon("exclamation-triangle", "fa-2x"), strong("There is no data to display,"), " please upload a dataset."))
+             paste0(div(class = "infobox", 
+                        h4(icon("upload"), nrow(dengue_data_dl()), " Patients"), 
+                        tags$ul( 
+                          tags$li("Patients admitted at Mahosot hospital with suspicion of dengue infection, according to WHO criteria (2009)."),
+                          tags$li("Source: ", source_data()),
+                          tags$li("Generated on the: ", date_generation())
+                        ))
+             ),
+             paste0(div(class = "alert", 
+                        icon("exclamation-triangle", "fa-2x"), strong("There is no data to display,"), " please upload a dataset.")
+             )
       )
     })
     
@@ -67,8 +72,14 @@ shinyServer(
     output$data_filter <- renderText({
       req(data_available())
       
-      paste0("Original dataset contains ", nrow(dengue_data_dl()), " elements", br(), 
-             "Filtered dataset contains ", nrow(dengue_data_filt()), " elements")
+      paste0(div(class = "alert", 
+                 h4(icon("filter"), nrow(dengue_data_filt()), " Patients selected"), 
+                 tags$ul( 
+                   tags$li(paste0("original dataset contains ", nrow(dengue_data_dl()), " patients admitted at Mahosot hospital with suspicion of dengue infection, according to WHO criteria (2009).")),
+                   tags$li(paste0(nrow(dengue_data_dl()) - nrow(dengue_data_filt()), " patients where filtered out."))
+      )
+      )
+      )
     })
     
     
@@ -81,7 +92,7 @@ shinyServer(
         count() %>%
         ungroup()
       
-      hchart(data, "column", hcaes(x = collection_week, y = n, group = dengue_virus, label = dengue_virus, week = collection_week_str)) %>%
+      hchart(data, "column", hcaes(x = 'collection_week', y = 'n', group = 'dengue_virus', label = 'dengue_virus', week = 'collection_week_str')) %>%
         hc_plotOptions(column = list(stacking = "normal", dataLabels = list())) %>%
         hc_add_theme(hc_theme_538()) %>%
         hc_title(text = "Patients per week") %>%
@@ -131,7 +142,7 @@ shinyServer(
       #   facet_wrap(~ collection_year, scales = "free_x") +
       #   theme_minimal(base_size = 16)
       
-         
+      
       df <- dengue_data_filt() %>%
         mutate(month = month(collection_date, label = FALSE)) %>%
         mutate(month = ifelse(month < 10, paste0("0", month), as.character(month))) %>%
@@ -144,7 +155,7 @@ shinyServer(
       
       df %>%
         mutate(year_month = as.factor(year_month)) %>%
-        hchart("column", hcaes(x = year_month, y = n, group = dengue_virus, label = dengue_virus, label2 = year_month)) %>%
+        hchart("column", hcaes(x = 'year_month', y = 'n', group = 'dengue_virus', label = 'dengue_virus', label2 = 'year_month')) %>%
         hc_plotOptions(column = list(stacking = "normal", dataLabels = list())) %>%
         hc_add_theme(hc_theme_538()) %>%
         hc_title(text = "Patients per month") %>%
@@ -245,7 +256,7 @@ shinyServer(
         group_by(collection_year, collection_month, elisa_ns1) %>%
         count() %>%
         complete(collection_year, collection_month, elisa_ns1) %>%
-      ggplot(aes(x = collection_month, y = n, fill = elisa_ns1)) +
+        ggplot(aes(x = collection_month, y = n, fill = elisa_ns1)) +
         geom_col(position = "dodge") +
         labs(x = NULL, y = "Tests", title = "ELISA Tests, NS1", subtitle = " per month and result") +
         facet_wrap(~ collection_year, scales = "free_x") +
@@ -272,7 +283,7 @@ shinyServer(
         group_by(collection_year, collection_month, elisa_igm) %>%
         count() %>%
         complete(collection_year, collection_month, elisa_igm) %>%
-      ggplot(aes(x = collection_month, y = n, fill = elisa_igm)) +
+        ggplot(aes(x = collection_month, y = n, fill = elisa_igm)) +
         geom_col(position = "dodge") +
         labs(x = NULL, y = "Tests", title = "ELISA Tests, IgM", subtitle = " per month and result") +
         facet_wrap(~ collection_year, scales = "free_x") +
@@ -381,7 +392,7 @@ shinyServer(
         complete(collection_year, collection_month, pcr_result) %>%
         ggplot(aes(x = collection_month, y = n, fill = pcr_result)) +
         geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "PCR Serotype", subtitle = " per month and result") +
+        labs(x = NULL, y = "Tests", title = "PCR Results", subtitle = " per month and result") +
         facet_wrap(~ collection_year, scales = "free_x") +
         theme_minimal(base_size = 14) +
         theme(legend.position = "bottom", legend.title = element_blank()) +
@@ -402,7 +413,7 @@ shinyServer(
     # PLH 18, plot of patients, PCR serotype
     output$plot_patients_pcr <- renderPlot({
       req(data_available())
-
+      
       dengue_data_filt() %>%
         filter(!is.na(pcr_serotype)) %>%
         group_by(collection_year, collection_month, pcr_serotype) %>%
@@ -410,7 +421,7 @@ shinyServer(
         complete(collection_year, collection_month, pcr_serotype) %>%
         ggplot(aes(x = collection_month, y = n, fill = pcr_serotype)) +
         geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "PCR Serotype", subtitle = " per month and result") +
+        labs(x = NULL, y = "Tests", title = "PCR Results", subtitle = " per month and result") +
         facet_wrap(~ collection_year, scales = "free_x") +
         theme_minimal(base_size = 14) +
         theme(legend.position = "bottom", legend.title = element_blank()) +
