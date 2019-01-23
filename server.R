@@ -72,29 +72,37 @@ shinyServer(
     output$data_filter <- renderText({
       req(data_available())
       
-      paste0(div(class = "alert", 
-                 h4(icon("filter"), nrow(dengue_data_filt()), " Patients selected"), 
-                 tags$ul( 
-                   tags$li(paste0("original dataset contains ", nrow(dengue_data_dl()), " patients admitted at Mahosot hospital with suspicion of dengue infection, according to WHO criteria (2009).")),
-                   tags$li(paste0(nrow(dengue_data_dl()) - nrow(dengue_data_filt()), " patients where filtered out."))
-      )
-      )
+      ifelse(nrow(dengue_data_filt()) == nrow(dengue_data_dl()),
+             
+             paste0(div(class = "infobox", 
+                        h4(icon("filter"), paste0("All ", nrow(dengue_data_filt()), " patients in the provided dataset are selected"))
+             )),
+             
+             paste0(div(class = "alert", 
+                        h4(icon("filter"), nrow(dengue_data_filt()), " Patients selected"), 
+                        tags$ul( 
+                          tags$li(paste0("original dataset contains ", nrow(dengue_data_dl()), " patients admitted at Mahosot hospital with suspicion of dengue infection, according to WHO criteria (2009).")),
+                          tags$li(paste0(nrow(dengue_data_dl()) - nrow(dengue_data_filt()), " patients where filtered out."))
+                        )
+             )
+             )
       )
     })
     
     
     # PLH2: plot dengue cases per week
     output$plot_dengue_week <- renderHighchart({
-      req(data_available())
+      req(dengue_data_filt())
       
-      data <- dengue_data_filt() %>%
+      dengue_data_filt() %>%
         group_by(collection_week, collection_week_str, dengue_virus) %>% 
         count() %>%
-        ungroup()
-      
-      hchart(data, "column", hcaes(x = 'collection_week', y = 'n', group = 'dengue_virus', label = 'dengue_virus', week = 'collection_week_str')) %>%
+        ungroup() %>%
+        complete(dengue_virus, nesting(collection_week, collection_week_str), fill = list(n = 0)) %>%
+        hchart("column", hcaes(x = 'collection_week', y = 'n', group = 'dengue_virus', label = 'dengue_virus', week = 'collection_week_str')) %>%
         hc_plotOptions(column = list(stacking = "normal", dataLabels = list())) %>%
         hc_add_theme(hc_theme_538()) %>%
+        hc_colors(cols) %>%
         hc_title(text = "Patients per week") %>%
         hc_xAxis(title = list(text = "Week of collection")) %>%
         hc_yAxis(title = list(text = "Number of Patients")) %>%
@@ -107,7 +115,7 @@ shinyServer(
     
     # PLH3: table of dengue cases per week
     output$table_dengue_week <- renderDT({
-      req(data_available())
+      req(dengue_data_filt())
       
       datatable(dengue_data_filt() %>% 
                   group_by(collection_year, collection_week, collection_week_str) %>% 
@@ -116,71 +124,35 @@ shinyServer(
                 rownames = FALSE)
     })
     
-    # PLH4: plot dengue cases per day
-    output$plot_dengue_day <- renderPlot({
-      req(data_available())
-      
-      ggplot(data = dengue_data_filt(), aes(x = collection_day, fill = dengue_virus)) +
-        geom_bar(stat = "count", width = 0.8) +
-        labs(x = NULL, y = NULL, title = "Patients per day") +
-        facet_wrap(~ collection_year + collection_month, scales = "fixed", labeller = label_value) +
-        theme_minimal(base_size = 16) +
-        theme(panel.spacing = unit(2, "lines"), axis.text.x = element_text(size = 11), legend.position = "bottom", legend.title = element_blank())
-    })
     
     # PLH5: plot dengue cases per month
     output$plot_dengue_month <- renderHighchart({
       req(data_available())
+      req(dengue_data_filt())
       
-      # ggplot(data =  dengue_data_filt() %>% 
-      #          mutate(month = month(collection_date, label = TRUE)) %>% 
-      #          group_by(collection_year, month, dengue_virus) %>% 
-      #          summarise(total = n()), 
-      #        aes(x = month, y = total, fill = dengue_virus)) +
-      #   geom_col() +
-      #   labs(x = NULL, y = NULL, title = "Dengue Tests Results", subtitle = "per month") +
-      #   facet_wrap(~ collection_year, scales = "free_x") +
-      #   theme_minimal(base_size = 16)
-      
-      
-      df <- dengue_data_filt() %>%
+      dengue_data_filt() %>%
         mutate(month = month(collection_date, label = FALSE)) %>%
         mutate(month = ifelse(month < 10, paste0("0", month), as.character(month))) %>%
         mutate(year_month = paste(collection_year, month, sep = "-")) %>%
         group_by(year_month, dengue_virus) %>%
         count() %>%
         ungroup() %>%
-        arrange(year_month)
-      
-      
-      df %>%
+        arrange(year_month) %>%
         mutate(year_month = as.factor(year_month)) %>%
-        hchart("column", hcaes(x = 'year_month', y = 'n', group = 'dengue_virus', label = 'dengue_virus', label2 = 'year_month')) %>%
+        complete(dengue_virus, nesting(year_month), fill = list(n = 0)) %>%
+        hchart("column", hcaes(x = 'year_month', y = 'n', group = 'dengue_virus',
+                               label = 'dengue_virus', label2 = 'year_month')) %>%
         hc_plotOptions(column = list(stacking = "normal", dataLabels = list())) %>%
         hc_add_theme(hc_theme_538()) %>%
+        hc_colors(cols) %>%
         hc_title(text = "Patients per month") %>%
-        hc_xAxis(title = list(text = "Month of collection"), categories = unique(df$year_month)) %>%
+        hc_xAxis(title = list(text = "Month of collection")) %>%
         hc_yAxis(title = list(text = "Number of Patients")) %>%
         hc_tooltip(useHTML = TRUE, borderWidth = 4,
                    headerFormat = "",
                    pointFormat = "Month: {point.year_month} <br> 
                    {point.label}: {point.y}")
-      
     })
-    
-    # PLH6:  plot dengue cases per district
-    # output$plot_dengue_district <- renderPlot({
-    #   req(data_available())
-    #   
-    #   ggplot(data = dengue_data_filt() %>% 
-    #            filter(patient_province == "Vientiane Capital"), 
-    #          aes(x = collection_month, fill = dengue_virus)) +
-    #     geom_bar(stat = "count", width = 0.5) +
-    #     labs(x = NULL, y = "Cases", title = "Dengue Cases in Vientiane Capital", subtitle = "per month and per district") +
-    #     facet_wrap(~ collection_year + patient_district, scales = "fixed") +
-    #     theme_minimal(base_size = 14) +
-    #     theme(axis.text.x = element_text(angle=45, hjust=1, size = 9))
-    # })
     
     # PLH7: map dengue cases per district
     output$map_dengue_district <- renderLeaflet({
@@ -253,16 +225,19 @@ shinyServer(
       req(data_available())
       
       dengue_data_filt() %>%
-        group_by(collection_year, collection_month, elisa_ns1) %>%
+        group_by(collection_year, collection_month, elisa_ns1) %>% 
         count() %>%
-        complete(collection_year, collection_month, elisa_ns1) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, elisa_ns1), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = elisa_ns1)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "ELISA Tests, NS1", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "ELISA, NS1") +
+        scale_fill_manual(values = cols_elisa_ns1) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
     })
     
     # PLH 13: table of patients, ELISA IgM
@@ -278,18 +253,20 @@ shinyServer(
     output$plot_patients_elisa_igm <- renderPlot({
       req(data_available())
       
-      
-      dengue_data_filt() %>%
-        group_by(collection_year, collection_month, elisa_igm) %>%
+        dengue_data_filt() %>%
+        group_by(collection_year, collection_month, elisa_igm) %>% 
         count() %>%
-        complete(collection_year, collection_month, elisa_igm) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, elisa_igm), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = elisa_igm)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "ELISA Tests, IgM", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "ELISA, IgM") +
+        scale_fill_manual(values = cols_elisa_igm) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
     })
     
     # PLH14: table of patients, RDT NS1
@@ -306,16 +283,19 @@ shinyServer(
       req(data_available())
       
       dengue_data_filt() %>%
-        group_by(collection_year, collection_month, rdt_ns1) %>%
+        group_by(collection_year, collection_month, rdt_ns1) %>% 
         count() %>%
-        complete(collection_year, collection_month, rdt_ns1) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, rdt_ns1), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = rdt_ns1)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "RDT Tests, NS1", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "RDT, NS1") +
+        scale_fill_manual(values = cols_rdt) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
     })
     
     # PLH16: plot of patient, RDT IgM
@@ -323,16 +303,19 @@ shinyServer(
       req(data_available())
       
       dengue_data_filt() %>%
-        group_by(collection_year, collection_month, rdt_igm) %>%
+        group_by(collection_year, collection_month, rdt_igm) %>% 
         count() %>%
-        complete(collection_year, collection_month, rdt_igm) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, rdt_igm), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = rdt_igm)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "RDT Tests, IgM", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "RDT, IgM") +
+        scale_fill_manual(values = cols_rdt) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
     })
     
     # PLH16-2: table of patients, RDT IgM
@@ -351,16 +334,19 @@ shinyServer(
       req(data_available())
       
       dengue_data_filt() %>%
-        group_by(collection_year, collection_month, rdt_igg) %>%
+        group_by(collection_year, collection_month, rdt_igg) %>% 
         count() %>%
-        complete(collection_year, collection_month, rdt_igg) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, rdt_igg), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = rdt_igg)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "RDT Tests, IgG", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "RDT, IgG") +
+        scale_fill_manual(values = cols_rdt_igg) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
     })
     
     # PLH16-4: table of patients, RDT IgG
@@ -382,21 +368,24 @@ shinyServer(
         rename(`PCR Result` = Var1, Patients = Freq)
     })
     
-    # PLH 16-6, plot of patients, PCR serotype
+    # PLH 16-6, plot of patients, PCR results
     output$plot_patients_pcr_res <- renderPlot({
       req(data_available())
       
       dengue_data_filt() %>%
-        group_by(collection_year, collection_month, pcr_result) %>%
+        group_by(collection_year, collection_month, pcr_result) %>% 
         count() %>%
-        complete(collection_year, collection_month, pcr_result) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, pcr_result), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = pcr_result)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "PCR Results", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "PCR Results") +
+        scale_fill_manual(values = cols_pcr_result) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
       
     })
     
@@ -416,16 +405,19 @@ shinyServer(
       
       dengue_data_filt() %>%
         filter(!is.na(pcr_serotype)) %>%
-        group_by(collection_year, collection_month, pcr_serotype) %>%
+        group_by(collection_year, collection_month, pcr_serotype) %>% 
         count() %>%
-        complete(collection_year, collection_month, pcr_serotype) %>%
+        ungroup() %>%
+        complete(nesting(collection_year, collection_month, pcr_serotype), fill = list(n = 0)) %>%
         ggplot(aes(x = collection_month, y = n, fill = pcr_serotype)) +
-        geom_col(position = "dodge") +
-        labs(x = NULL, y = "Tests", title = "PCR Results", subtitle = " per month and result") +
+        geom_col() +
+        labs(x = NULL, y = "Nb. of Tests", title = "PCR Serotype") +
+        scale_fill_manual(values = cols_pcr_serotype) +
         facet_wrap(~ collection_year, scales = "free_x") +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "bottom", legend.title = element_blank()) +
-        guides(fill = guide_legend(nrow = 1))
+        theme_minimal(base_size = 13) +
+        theme(legend.position = "bottom", legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        guides(fill = guide_legend(nrow = 2))
       
     })
   }

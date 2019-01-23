@@ -46,10 +46,37 @@ img {
     margin-top: 5px;
 }
 
+
+.diagbox {
+	background-color: white;
+	border-style: solid;
+	border-color: gray;
+	border-width: 1px;
+	padding: 10px;
+}
+
+.confirmedbox {
+  background-color: #ca0020;
+  padding: 2px;
+  color: white;
+}
+
+.presumptivebox {
+  background-color: #f4a582;
+  padding: 2px;
+  color: black;
+}
+
+.noevidencebox {
+  background-color: #92c5de;
+  padding: 2px;
+  color: black;
+}
+
 .floatbottom {
   position:fixed;
-  width: 25%;
+  width: 21%;
 	bottom: calc(2%);
-	left: calc(2%);
+	left: calc(3%);
 	z-index: 9999;
 }

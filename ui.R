@@ -23,8 +23,8 @@ fluidPage(
                                       dateRangeInput("filter_date", "Filter by collection date"),
                                       checkboxGroupInput("filter_age", "Filter by age categories", choices = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), 
                                                          selected = c("Under 5 y.o.", "5 to 15 y.o.", "Above 15 y.o.", "Unknown"), inline = TRUE),
-                                      checkboxGroupInput("filter_status", "Filter by case status", choices = c("presumptive dengue infection", "confirmed dengue infection", "no evidence of dengue infection"), 
-                                                         selected = c("presumptive dengue infection", "confirmed dengue infection", "no evidence of dengue infection"), inline = TRUE)
+                                      checkboxGroupInput("filter_status", "Filter by case status", choices = c("Confirmed dengue infection", "Presumptive dengue infection", "No evidence of dengue infection"), 
+                                                         selected = c("Confirmed dengue infection", "Presumptive dengue infection", "No evidence of dengue infection"), inline = TRUE)
                                   ),
                                   div(class = 'floatbottom', htmlOutput("data_filter"))
                  )
@@ -42,20 +42,25 @@ fluidPage(
                                 includeMarkdown("./www/about_dengue.md")
                        ),
                        tabPanel("Epidemic Trends", value = "dengue_trends",
-                                h2("Focus per month"),
+                                div(class = "diagbox",
+                                p("Results were obtained by testing by PCR, ELISA and RDT admission serum from patients admitted at Mahosot hospital with clinical presentation meeting 2009 WHO criteria for dengue fever."),
+                                div(class = "confirmedbox", "Confirmed dengue infection = dengue PCR and/or dengue NS1 positive (RDT or ELISA)"),
+                                
+                                div(class = "presumptivebox", "Presumptive dengue infection = anti-dengue IgM detection (RDT or ELISA) alone (PCR and NS1 negative))"),
+                                
+                                div(class = "noevidencebox", "No evidence of dengue infection = all other cases")
+                                ),
+                                h2("Breakdown per month"),
                                 highchartOutput("plot_dengue_month") %>% withSpinner(type = 4), # PLH5
                                 br(),
-                                h2("Focus per week"),
+                                h2("Breakdown per week"),
                                 highchartOutput("plot_dengue_week") %>% withSpinner(type = 4), # PLH2
                                 br(),
                                 fluidRow(
-                                  column(width = 8,
+                                  column(width = 12,
                                          dataTableOutput("table_dengue_week") %>% withSpinner(type = 4) # PLH3
                                   )
-                                ),
-                                br(),
-                                h2("Focus per day"),
-                                plotOutput("plot_dengue_day", height = "600px") %>% withSpinner(type = 4) # PLH4
+                                )
                        ),
                        tabPanel("Patients Info", value = "info_patients",
                                 # fluidRow(
@@ -86,45 +91,55 @@ fluidPage(
                        tabPanel("Dengue Virus, Test & Results", value = "dengue_virus",
                                 tabsetPanel(
                                   tabPanel("ELISA Method", value = "elisa",
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
+                                                           br(),
+                                                           p("Confirmatory results for dengue infection"),
                                                            tableOutput("table_patients_elisa") %>% withSpinner(type = 4) # PLH12
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_elisa") %>% withSpinner(type = 4) #PLH12.2
                                            )),
                                            br(),
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
+                                                           br(),
+                                                           p("Presumptive results for dengue infection"),
                                                            tableOutput("table_patients_elisa_igm") %>% withSpinner(type = 4) # PLH13
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_elisa_igm") %>% withSpinner(type = 4) #PLH13.2
                                            ))
                                   ),
                                   tabPanel("RDT Method", value = "rdt",
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
+                                                           br(),
+                                                           p("Confirmatory results for dengue infection"),
                                                            tableOutput("table_patients_rdt_ns1") %>% withSpinner(type = 4) # PLH14
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_rdt_ns1") %>% withSpinner(type = 4)  # PLH15
                                            )),
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
+                                                           br(),
+                                                           p("Presumptive results for dengue infection"),
                                                            tableOutput("table_patients_rdt_igm") %>% withSpinner(type = 4) # PLH15bis
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_rdt_igm") %>% withSpinner(type = 4)  # PLH16 
                                            ))
                                   ),
                                   tabPanel("PCR Method", value = "pcr",
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
+                                                           br(),
+                                                           p("Confirmatory results for dengue infection"),
                                                            tableOutput("table_patients_pcr_res") %>% withSpinner(type = 4) # PLH17
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_pcr_res") %>% withSpinner(type = 4) # PLH18
                                            )),
-                                           fluidRow(column(width = 4,
+                                           fluidRow(column(width = 3,
                                                            tableOutput("table_patients_pcr") %>% withSpinner(type = 4) # PLH17
                                            ),
-                                           column(width = 8,
+                                           column(width = 9,
                                                   plotOutput("plot_patients_pcr") %>% withSpinner(type = 4) # PLH18
                                            ))
                                            
