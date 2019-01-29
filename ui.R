@@ -34,12 +34,12 @@ fluidPage(
   mainPanel(width = 9,
             navbarPage(NULL, position = "static-top", id = "tabs", collapsible = TRUE,  windowTitle = "LOMWRU Dengue Dashboard",
                        tabPanel("Welcome", value = "welcome",
-                                includeMarkdown("./www/disclaimer.md"),
                                 h2("What is Dengue?"),
                                 div(class = "imgtext",
                                     img(src = "dengue_fever_symptoms.png", alt = "Aedes Aegypti")
                                 ),
-                                includeMarkdown("./www/about_dengue.md")
+                                includeMarkdown("./www/about_dengue.md"),
+                                includeMarkdown("./www/disclaimer.md")
                        ),
                        tabPanel("Epidemic Trends", value = "dengue_trends",
                                 div(class = "diagbox",
